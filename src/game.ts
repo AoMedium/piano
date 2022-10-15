@@ -4,7 +4,7 @@ export class Game {
     private static _tick: number = 0;
     private static _isPaused: boolean = false;
 
-    private static frameIntervalId: NodeJS.Timer;
+    private static frameIntervalId;
 
     public static start(): void {
         if (this._useForceFrames) {

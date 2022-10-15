@@ -1,90 +1,63 @@
-import { c } from './index.js';
-import { Game } from './game.js';
-
 export class Vector2 {
-    public x: number;
-    public y: number;
-
-    constructor(x?: number, y?: number) {
+    constructor(x, y) {
         this.x = x || 0;
         this.y = y || 0;
     }
 }
-
-abstract class Key {
-    static readonly KEY_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-
-    protected id: number;
-    protected name: string;
-
-    constructor(id: number, name: string) {
+class Key {
+    constructor(id, name) {
         this.id = id;
         this.name = name;
     }
-
-    public update(): void {
-        
+    update() {
     }
-
-    public static onclick(key): void {
+    static onclick(key) {
         console.log(key);
     }
 }
-
+Key.KEY_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 class BlackKey extends Key {
-
-    public update(): void {
+    update() {
     }
 }
-
 class WhiteKey extends Key {
-
-    public update(): void {
+    update() {
     }
 }
-
 export class Piano {
-
-    private readonly NUM_OCTAVES: number = 2;
-    private keys: Key[] = [];
-
     constructor() {
+        this.NUM_OCTAVES = 2;
+        this.keys = [];
         this.generateKeys();
     }
-
-    public update(): void {
+    update() {
         // this.keys.forEach(key => {
         //     key.update();
         // });
     }
-
-    private generateKeys(): void {
+    generateKeys() {
         let id = 0;
         let keyCount = 0;
-
-        let piano: HTMLElement = document.getElementById("piano");
-
+        let piano = document.getElementById("piano");
         for (let i = 0; i < this.NUM_OCTAVES; i++) {
             Key.KEY_NAMES.forEach(keyName => {
                 let key = document.createElement("li");
                 key.id = keyName + i;
                 key.classList.add("unpressed");
-
                 if (keyCount == 0) {
                     key.classList.add("key-left-end");
                 }
-
                 if (keyName.includes("#")) {
                     key.classList.add("black-key");
-                } else {
+                }
+                else {
                     key.classList.add("white-key");
                 }
-
                 key.setAttribute("onclick", "Key.onclick(this)"); // As cannot assign onclick to string in TypeScript
-
                 piano.appendChild(key);
                 keyCount++;
             });
         }
     }
 }
+//# sourceMappingURL=models.js.map
