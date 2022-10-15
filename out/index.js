@@ -1,4 +1,4 @@
-import { Piano } from "./models.js";
+import { KeyManager, Piano, Timeline } from "./models.js";
 import { Game } from "./game.js";
 import { PlayerController } from "./input.js";
 export const canvas = document.querySelector("canvas");
@@ -23,14 +23,15 @@ function initCanvas() {
 function initGame() {
     let piano = new Piano();
     let controller = new PlayerController();
+    let timeline = new Timeline();
+    KeyManager.timeline = timeline;
     Game.nextFrame = () => {
-        piano.update();
+        timeline.update();
     };
     Game.clear = () => {
         c.clearRect(0, 0, innerWidth, innerHeight);
     };
     Game.setFPS(10);
-    //Game.start();
 }
 main();
 //# sourceMappingURL=index.js.map

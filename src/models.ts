@@ -25,23 +25,29 @@ abstract class Key {
     public update(): void {
         
     }
+}
 
-    public static onclick(key: HTMLElement): void {
-        console.log(key.id);
+export class KeyManager {
+
+    private static _timeline: Timeline;
+
+    static set timeline(timeline: Timeline) {
+        KeyManager._timeline = timeline;
+    }
+
+    public static onmousedown(key: HTMLElement): void {
+        console.log(key.id + " down");
+
+        let bounds: DOMRect = key.getBoundingClientRect();
+        KeyManager._timeline.addNewNote(new NoteRect(key.id, bounds.x, bounds.width, bounds.y));
+    }
+    public static onmouseup(key: HTMLElement): void {
+        console.log(key.id + " up");
+
+        KeyManager._timeline.stopPlayingNote(key.id);
     }
 }
 
-class BlackKey extends Key {
-
-    public update(): void {
-    }
-}
-
-class WhiteKey extends Key {
-
-    public update(): void {
-    }
-}
 
 export class Piano {
 
@@ -80,13 +86,86 @@ export class Piano {
                     key.classList.add("white-key");
                 }
 
-                key.onclick = e => {
-                    Key.onclick(e.target as HTMLElement);
+                key.onmousedown = e => {
+                    KeyManager.onmousedown(e.target as HTMLElement);
+                }
+
+                key.onmouseup = e => {
+                    KeyManager.onmouseup(e.target as HTMLElement);
                 }
 
                 piano.appendChild(key);
                 keyCount++;
             });
         }
+    }
+}
+
+export class NoteRect {
+    public readonly id: string;
+    private _xPos: number;
+    private _startY: number;
+    private _endY: number;
+    private readonly _width: number;
+
+    private _isPlaying: boolean = true;
+
+    constructor(id: string, xPos: number, width: number, startY: number) {
+        this.id = id;
+        this._xPos = xPos;
+        this._width = width;
+        this._startY = startY;
+        this._endY = startY;
+    }
+    
+    public update(scrollRate: number): void {
+        c.fillRect(this._xPos, this._endY, this._width, this._startY - this._endY);
+
+        if (!this._isPlaying) {
+            this._startY -= scrollRate;
+        }
+        this._endY -= scrollRate;
+    }
+
+    public stopPlaying(): void {
+        this._isPlaying = false;
+    }
+
+    get endHeight(): number {
+        return this._endY;
+    }
+}
+
+export class Timeline {
+    private _noteRects: NoteRect[] = [];
+    private _scrollRate: number = 5;
+
+    constructor() {
+
+    }
+
+    public update(): void {
+        this._noteRects.forEach((noteRect: NoteRect) => {
+            noteRect.update(this._scrollRate);
+
+            // Remove if out of view
+            if (noteRect.endHeight < 0) {
+                let index = this._noteRects.indexOf(noteRect);
+                this._noteRects.splice(index, 1);
+            }
+            
+        });
+    }
+
+    public addNewNote(noteRect: NoteRect): void {
+        this._noteRects.push(noteRect);
+    }
+
+    public stopPlayingNote(id: string): void {
+        this._noteRects.forEach((noteRect: NoteRect) => {
+            if (noteRect.id == id) {
+                noteRect.stopPlaying();
+            }
+        });
     }
 }
