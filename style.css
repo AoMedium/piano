@@ -1,8 +1,19 @@
+:root {
+	--white-key-height: 150px;
+	--white-key-width: 30px;
+	--black-key-ratio: 0.6;
+	--key-border-width: 1px;
+}
+
+* {
+	box-sizing: border-box;
+}
+
 body {
 	margin: 0 auto;
 	font-family: Helvetica;
 
-	background-color: #000;
+	background-color: #fff;
 	user-select: none;
 }
 
@@ -20,4 +31,53 @@ canvas {
 	color: #999;
 	letter-spacing: 1.5px;
 	font-variant-caps: all-small-caps;
+}
+
+
+#piano {
+	position: absolute;
+	display: flex;
+	top: 50%;
+	left: 50%;
+	margin: 0;
+	padding: 0;
+	transform: translate(-50%, -50%);
+
+	list-style:none;
+}
+
+#piano li {
+	transition: background-color 0.1s;
+}
+
+.white-key {
+	width: var(--white-key-width);
+	height: var(--white-key-height);
+
+	background-color: white;
+	border: solid var(--key-border-width) black;
+	/* To prevent double borders of double width */
+	border-left: none;
+}
+.white-key:hover {
+	background-color: #bbb;
+}
+
+.key-left-end {
+	border: solid var(--key-border-width) black;
+}
+
+.black-key {
+	width: calc(var(--white-key-width) * var(--black-key-ratio));
+	height: calc(var(--white-key-height) * var(--black-key-ratio));
+
+	/* Center between white keys by accounting for border width */
+	margin-right: calc(-1 * var(--black-key-ratio) * var(--white-key-width));
+	transform: translateX(calc(-50% - var(--key-border-width)));
+
+	background-color: black;
+	border: solid var(--key-border-width) black;
+}
+.black-key:hover {
+	background-color: #555;
 }
