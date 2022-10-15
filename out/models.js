@@ -12,7 +12,7 @@ class Key {
     update() {
     }
     static onclick(key) {
-        console.log(key);
+        console.log(key.id);
     }
 }
 Key.KEY_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -53,7 +53,9 @@ export class Piano {
                 else {
                     key.classList.add("white-key");
                 }
-                key.setAttribute("onclick", "Key.onclick(this)"); // As cannot assign onclick to string in TypeScript
+                key.onclick = e => {
+                    Key.onclick(e.target);
+                };
                 piano.appendChild(key);
                 keyCount++;
             });

@@ -26,8 +26,8 @@ abstract class Key {
         
     }
 
-    public static onclick(key): void {
-        console.log(key);
+    public static onclick(key: HTMLElement): void {
+        console.log(key.id);
     }
 }
 
@@ -80,7 +80,9 @@ export class Piano {
                     key.classList.add("white-key");
                 }
 
-                key.setAttribute("onclick", "Key.onclick(this)"); // As cannot assign onclick to string in TypeScript
+                key.onclick = e => {
+                    Key.onclick(e.target as HTMLElement);
+                }
 
                 piano.appendChild(key);
                 keyCount++;
