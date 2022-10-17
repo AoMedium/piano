@@ -6,19 +6,12 @@ export const canvas = document.querySelector("canvas");
 export const c = canvas.getContext('2d');
 
 
-
-
 function main() {
     initCanvas();
     initGame();
 
     Game.start();
 }
-
-
-
-
-
 
 function initCanvas() {
     // fix blurry canvas rendering
@@ -38,7 +31,7 @@ function initCanvas() {
 function initGame() {
 
     let piano: Piano = new Piano();
-    let controller: PlayerController = new PlayerController();
+    let controller: PlayerController = new PlayerController(piano);
 
     let timeline: Timeline = new Timeline();
     KeyManager.timeline = timeline;
@@ -51,7 +44,7 @@ function initGame() {
         c.clearRect(0, 0, innerWidth, innerHeight);
     }
 
-    Game.setFPS(10);
+    Game.setFPS(30);
 }
 
 main();

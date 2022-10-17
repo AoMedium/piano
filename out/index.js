@@ -22,7 +22,7 @@ function initCanvas() {
 }
 function initGame() {
     let piano = new Piano();
-    let controller = new PlayerController();
+    let controller = new PlayerController(piano);
     let timeline = new Timeline();
     KeyManager.timeline = timeline;
     Game.nextFrame = () => {
@@ -31,7 +31,7 @@ function initGame() {
     Game.clear = () => {
         c.clearRect(0, 0, innerWidth, innerHeight);
     };
-    Game.setFPS(10);
+    Game.setFPS(30);
 }
 main();
 //# sourceMappingURL=index.js.map

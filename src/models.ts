@@ -11,19 +11,64 @@ export class Vector2 {
     }
 }
 
-abstract class Key {
-    static readonly KEY_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+export class Key {
+    static readonly KEY_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G","G#", "A", "A#", "B"]
+ 
+    static readonly KEY_BINDS = {
+        "whiteKeys": {
+            "noteRange": {
+                "bottomRow": ["A0", "C2"],
+                "topRow": ["A1", "G3"]
+            },
+            "keyCodes": {
+                "bottomRow": ["z","x","c","v","b","n","m",",",".","/"],
+                "topRow": ["q","w","e","r","t","y","u","i","o","p","[","]"]
+            }
+        },
+        "blackKeys": {
+            "noteRange": {
+                "bottomRow": ["G#0", "C#2"],
+                "topRow": ["G#1", "F#3"]
+            },
+            "keyCodes": {
+                "bottomRow": ["a","s","f","g","j","k","l","'"],
+                "topRow": ["1","2","4","5","7","8","9","-","="]
+            }
+        }
+    }
+        
+        
 
-    protected id: number;
-    protected name: string;
+    public readonly id: string;
+    public readonly name: string;
+    private _inputKeyCodes: string[] = [];
 
-    constructor(id: number, name: string) {
+
+    constructor(id: string, name: string) {
         this.id = id;
         this.name = name;
     }
 
-    public update(): void {
-        
+    get inputKeyCodes(): string[] {
+        return this._inputKeyCodes;
+    }
+
+    set inputKeyCodes(keyCode: string[]) {
+        this._inputKeyCodes = keyCode;
+    }
+
+    addInputKeyCode(keyCode: string) {
+        this._inputKeyCodes.push(keyCode);
+    }
+
+    hasKeyCode(findKeyCode: string) {
+        let foundKey: boolean = false; // TODO: better way to return true in anon func?
+        this._inputKeyCodes.forEach(keyCode => {
+            if (keyCode === findKeyCode) {
+                foundKey = true;
+            }
+        });
+        return foundKey;
     }
 }
 
@@ -35,27 +80,40 @@ export class KeyManager {
         KeyManager._timeline = timeline;
     }
 
-    public static onmousedown(key: HTMLElement): void {
-        console.log(key.id + " down");
+    public static keyDown(key: HTMLElement | string): void {
+        let keyId: string;
+        if (key instanceof HTMLElement) {
+
+        } else {
+            key = document.getElementById(key);
+        }
+        keyId = key.id;
 
         let bounds: DOMRect = key.getBoundingClientRect();
-        KeyManager._timeline.addNewNote(new NoteRect(key.id, bounds.x, bounds.width, bounds.y));
+        KeyManager._timeline.addNewNote(new NoteRect(keyId, bounds.x, bounds.width, bounds.y));
     }
-    public static onmouseup(key: HTMLElement): void {
-        console.log(key.id + " up");
 
-        KeyManager._timeline.stopPlayingNote(key.id);
+    public static keyUp(key: HTMLElement | string): void {
+        let keyId: string;
+        if (key instanceof HTMLElement) {
+        } else {
+            key = document.getElementById(key);
+        }
+        keyId = key.id;
+
+        KeyManager._timeline.stopPlayingNote(keyId);
     }
 }
 
 
 export class Piano {
 
-    private readonly NUM_OCTAVES: number = 2;
-    private keys: Key[] = [];
+    private readonly NUM_OCTAVES: number = 3;
+    public keys: Key[] = []; // TODO: better getter
 
     constructor() {
         this.generateKeys();
+        this.bindKeys();
     }
 
     public update(): void {
@@ -65,7 +123,6 @@ export class Piano {
     }
 
     private generateKeys(): void {
-        let id = 0;
         let keyCount = 0;
 
         let piano: HTMLElement = document.getElementById("piano");
@@ -87,16 +144,74 @@ export class Piano {
                 }
 
                 key.onmousedown = e => {
-                    KeyManager.onmousedown(e.target as HTMLElement);
+                    KeyManager.keyDown(e.target as HTMLElement);
                 }
 
                 key.onmouseup = e => {
-                    KeyManager.onmouseup(e.target as HTMLElement);
+                    KeyManager.keyUp(e.target as HTMLElement);
                 }
 
                 piano.appendChild(key);
                 keyCount++;
             });
+        }
+    }
+
+    private bindKeys(): void {
+        let whiteKeys: string[] = [];
+        let blackKeys: string[] = [];
+
+        Key.KEY_NAMES.forEach(keyName => {
+            if (keyName.includes("#")) {
+                blackKeys.push(keyName);
+            } else {
+                whiteKeys.push(keyName);
+            }
+        });
+
+        let whiteKeysBinds = Key.KEY_BINDS.whiteKeys;
+        let noteRange = whiteKeysBinds.noteRange.bottomRow;
+
+        let startKey = {
+            "note": noteRange[0].slice(0,-1),
+            "octave": parseInt(noteRange[0].slice(-1)),
+        };
+
+        let endKey = {
+            "note": noteRange[1].slice(0,-1),
+            "octave": parseInt(noteRange[1].slice(-1))
+        };
+
+        let startIndex = whiteKeys.indexOf(startKey.note);
+        let endIndex = whiteKeys.indexOf(endKey.note);
+        let keyIndex = startIndex;
+        let octave = startKey.octave;
+
+        console.log(startIndex, endIndex)
+
+        let i = 0;
+
+        while (true) {
+            let noteName = whiteKeys[keyIndex] + octave;
+            let keyCode = whiteKeysBinds.keyCodes.bottomRow[i];
+
+            let key = new Key(noteName, noteName);
+            key.addInputKeyCode(keyCode);
+            console.log("bind " + noteName + " with " + keyCode);
+            this.keys.push(key);
+
+            if (keyIndex == whiteKeys.length - 1) {
+                keyIndex = 0; // wrap to beginning
+                octave++;
+            } else {
+                keyIndex++;
+            }
+
+            i++;
+
+            if (keyIndex > endIndex && octave >= endKey.octave) {
+                break;
+            }
         }
     }
 }
@@ -131,8 +246,8 @@ export class NoteRect {
         this._isPlaying = false;
     }
 
-    get endHeight(): number {
-        return this._endY;
+    get startY(): number {
+        return this._startY;
     }
 }
 
@@ -149,7 +264,7 @@ export class Timeline {
             noteRect.update(this._scrollRate);
 
             // Remove if out of view
-            if (noteRect.endHeight < 0) {
+            if (noteRect.startY < 0) {
                 let index = this._noteRects.indexOf(noteRect);
                 this._noteRects.splice(index, 1);
             }
